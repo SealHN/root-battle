@@ -198,3 +198,12 @@ body {
     margin-bottom: 1rem;
     text-shadow: 2px 2px 0 #000;
 }
+this.ctx.drawImage(
+    this.images.background, 
+    0, 0, this.width, this.height
+);
+
+// 添加边界检测提示
+if(this.player.x < 0 || this.player.x > this.width) {
+    console.warn("玩家超出边界！(╯°□°)╯");
+    }
