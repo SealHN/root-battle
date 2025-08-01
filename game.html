@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>根の战 - 激烈战斗中！</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <audio id="bgMusic" loop>
+        <source src="assets/sounds/b.ogg" type="audio/ogg">
+    </audio>
+    
+    <div class="score-display">得分: <span id="score">0</span></div>
+    
+    <div class="game-container">
+        <div id="floor" class="floor"></div>
+        <div id="stickman" class="stickman stand"></div>
+        <div id="daikon" class="daikon"></div>
+    </div>
+    
+    <div class="controls">
+        <div id="leftBtn" class="control-btn">←</div>
+        <div id="rightBtn" class="control-btn">→</div>
+        <div id="jumpBtn" class="control-btn">↑</div>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+</html>
