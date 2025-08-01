@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200">
+    <!-- 头 -->
+    <circle cx="30" cy="50" r="20" fill="#FFD700"/>
+    <!-- 身体 -->
+    <line x1="30" y1="70" x2="30" y2="120" stroke="#FFD700" stroke-width="5"/>
+    <!-- 手臂 -->
+    <line x1="30" y1="80" x2="10" y2="60" stroke="#FFD700" stroke-width="5"/>
+    <line x1="30" y1="80" x2="50" y2="60" stroke="#FFD700" stroke-width="5"/>
+    <!-- 腿 -->
+    <line x1="30" y1="120" x2="10" y2="140" stroke="#FFD700" stroke-width="5"/>
+    <line x1="30" y1="120" x2="50" y2="140" stroke="#FFD700" stroke-width="5"/>
+</svg>
