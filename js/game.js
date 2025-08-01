@@ -1,119 +1,87 @@
-// game.js - 根の战 完全修正版
 class Game {
     constructor() {
+        // 画布初始化
         this.canvas = document.getElementById('game-canvas');
         this.ctx = this.canvas.getContext('2d');
+        this.setCanvasSize();
+        
+        // 游戏状态
+        this.resetGameState();
+        
+        // 资源管理
+        this.assets = {
+            images: {},
+            paths: {
+                playerStand: 'svg/stickman.svg',
+                playerThrow: 'svg/throw.svg',
+                // ...其他资源路径...
+            }
+        };
+        
+        // 初始化流程
+        this.initControls();
+        this.loadResources().then(() => {
+            this.initGameObjects();
+            this.gameLoop();
+        }).catch(err => {
+            console.error("🚨 资源加载失败:", err);
+            this.showErrorScreen();
+        });
+    }
+
+    // === 核心方法 === //
+    setCanvasSize() {
         this.width = 800;
         this.height = 600;
         this.canvas.width = this.width;
         this.canvas.height = this.height;
+        console.log("🎮 画布尺寸设置为:", this.width, this.height);
+    }
 
-        // 游戏状态
+    resetGameState() {
         this.score = 0;
         this.isGameOver = false;
         this.isGameWon = false;
         this.isPlayerStunned = false;
-        this.stunTimer = 0;
-        this.projectileCooldown = 0;
-        
-        // 游戏对象
-        this.player = null;
-        this.enemy = null;
-        this.floor = null;
         this.projectiles = [];
         this.enemyProjectiles = [];
-        
-        // 控制状态
-        this.keys = {
-            left: false,
-            right: false,
-            jump: false
-        };
-        
-        // 资源路径前缀
-        this.assetPrefix = './assets/';
-        
-        // 资源占位符（防止未加载时报错）
-        this.images = {
-            playerStand: new Image(),
-            playerThrow: new Image(),
-            playerFallen: new Image(),
-            enemyNormal: new Image(),
-            enemyHurt: new Image(),
-            enemyAttack: new Image(),
-            banana: new Image(),
-            poop: new Image(),
-            dumbbell: new Image()
-        };
-        
-        this.initControls();
-        this.loadResources().then(() => {
-            this.init();
-            this.gameLoop();
-        }).catch(err => {
-            console.error("资源加载失败:", err);
-            alert(`资源加载错误: ${err.message}\n请检查控制台(◞‸◟ )`);
-        });
     }
-    
+
     async loadResources() {
-        // 加载图片
-        const loadImage = (key, path) => {
-            return new Promise((resolve, reject) => {
-                this.images[key].onload = resolve;
-                this.images[key].onerror = () => 
+        const loadPromises = [];
+        
+        // 图片加载
+        for (const [key, path] of Object.entries(this.assets.paths)) {
+            this.assets.images[key] = new Image();
+            loadPromises.push(new Promise((resolve, reject) => {
+                this.assets.images[key].onload = resolve;
+                this.assets.images[key].onerror = () => 
                     reject(new Error(`加载失败: ${path}`));
-                this.images[key].src = this.assetPrefix + path;
-            });
-        };
-
-        await Promise.all([
-            loadImage('playerStand', 'svg/stickman.svg'),
-            loadImage('playerThrow', 'svg/throw.svg'),
-            loadImage('playerFallen', 'svg/fallen.svg'),
-            loadImage('enemyNormal', 'images/c.png'),
-            loadImage('enemyHurt', 'images/e.png'),
-            loadImage('enemyAttack', 'images/f.png'),
-            loadImage('banana', 'svg/banana.svg'),
-            loadImage('poop', 'svg/poop.svg'),
-            loadImage('dumbbell', 'svg/dumbbell.svg')
-        ]);
-
-        console.log("所有资源加载完成！(๑•̀ㅂ•́)و✧");
+                this.assets.images[key].src = `./assets/${path}`;
+            }));
+        }
+        
+        await Promise.all(loadPromises);
+        console.log("✅ 所有资源加载完成");
     }
-    
-    init() {
-        // 重置游戏状态
-        this.score = 0;
-        this.isGameOver = false;
-        this.isGameWon = false;
-        this.isPlayerStunned = false;
-        this.projectiles = [];
-        this.enemyProjectiles = [];
-        
-        ui.updateScore(this.score);
-        
-        // 地板初始化（确保y坐标正确）
+
+    initGameObjects() {
+        // 地板
         this.floor = {
-            x: 0,
+            x: 0, 
             y: this.height - 50,
             width: this.width,
             height: 20
         };
         
-        // 玩家初始化（居中显示）
+        // 玩家初始化（居中偏下）
         this.player = {
             x: this.width / 2 - 25,
-            y: this.floor.y - 60,
+            y: this.floor.y - 100,  // 确保在地板上方
             width: 50,
             height: 60,
-            speed: 5,
-            jumpPower: 12,
-            velocityY: 0,
-            isJumping: false,
-            state: 'stand',
-            direction: 'right',
-            image: this.images.playerStand // 直接绑定图像
+            image: this.assets.images.playerStand,
+            // ...其他属性...
         };
         
         // 敌人初始化（右上角）
@@ -122,32 +90,92 @@ class Game {
             y: 50,
             width: 80,
             height: 100,
-            speed: 3,
-            velocityX: Utils.randomFloat(-3, 3),
-            velocityY: Utils.randomFloat(-1, 1),
-            state: 'normal',
-            hurtTimer: 0,
-            behavior: this.getRandomBehavior(),
-            behaviorTimer: Utils.randomInt(60, 180),
-            image: this.images.enemyNormal // 直接绑定图像
+            image: this.assets.images.enemyNormal,
+            // ...其他属性...
         };
-
-        console.log("游戏初始化完成！玩家位置:", this.player.x, this.player.y);
+        
+        console.log("🛠 游戏对象初始化完成");
+        console.log("📍 玩家位置:", this.player.x, this.player.y);
+        console.log("📍 大根位置:", this.enemy.x, this.enemy.y);
     }
 
-    /* 后续所有方法保持不变（包括update、draw等） */
-    // ...（保留原有游戏逻辑代码）...
+    draw() {
+        // 清空画布（使用半透明清空实现运动残影效果）
+        this.ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+        
+        // 绘制调试信息（开发时启用）
+        if (DEBUG_MODE) {
+            this.drawDebugInfo();
+        }
+        
+        // 绘制玩家
+        this.drawCharacter(this.player);
+        
+        // 绘制大根
+        this.drawCharacter(this.enemy);
+        
+        // ...其他绘制逻辑...
+    }
+
+    drawCharacter(obj) {
+        if (!obj.image.complete) {
+            // 图像未加载时显示占位符
+            this.ctx.fillStyle = 'red';
+            this.ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+            return;
+        }
+        
+        this.ctx.save();
+        if (obj.direction === 'left') {
+            this.ctx.scale(-1, 1);
+            this.ctx.drawImage(
+                obj.image, 
+                -obj.x - obj.width, 
+                obj.y, 
+                obj.width, 
+                obj.height
+            );
+        } else {
+            this.ctx.drawImage(
+                obj.image, 
+                obj.x, 
+                obj.y, 
+                obj.width, 
+                obj.height
+            );
+        }
+        this.ctx.restore();
+    }
+
+    // === 调试工具 === //
+    drawDebugInfo() {
+        this.ctx.fillStyle = 'white';
+        this.ctx.font = '14px Arial';
+        this.ctx.fillText(`玩家: (${this.player.x},${this.player.y})`, 10, 20);
+        this.ctx.fillText(`大根: (${this.enemy.x},${this.enemy.y})`, 10, 40);
+        
+        // 显示碰撞框
+        this.ctx.strokeStyle = 'lime';
+        this.ctx.strokeRect(
+            this.player.x, 
+            this.player.y, 
+            this.player.width, 
+            this.player.height
+        );
+    }
+
+    showErrorScreen() {
+        this.ctx.fillStyle = 'black';
+        this.ctx.fillRect(0, 0, this.width, this.height);
+        this.ctx.fillStyle = 'red';
+        this.ctx.font = '24px Arial';
+        this.ctx.fillText('资源加载失败，请刷新重试', 50, this.height/2);
+    }
 }
 
-// 添加调试快捷键
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'd' && e.ctrlKey) {
-        console.log("=== 调试模式 ===");
-        console.log("玩家:", game.player);
-        console.log("大根:", game.enemy);
-        game.ctx.fillStyle = 'rgba(0,255,0,0.3)';
-        game.ctx.fillRect(game.player.x, game.player.y, game.player.width, game.player.height);
-        game.ctx.fillStyle = 'rgba(255,0,0,0.3)';
-        game.ctx.fillRect(game.enemy.x, game.enemy.y, game.enemy.width, game.enemy.height);
-    }
-});
+// 全局调试开关
+const DEBUG_MODE = true; // 发布时改为false
+
+// 启动游戏
+const game = new Game();
