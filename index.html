@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>根の战 (◣_◢) 开♂战!</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 主页面 -->
+    <div id="main-menu" class="screen">
+        <div class="title">开♂战</div>
+        <button id="volume-toggle" class="volume-btn">🔊</button>
+    </div>
+
+    <!-- 游戏说明弹窗 -->
+    <div id="instructions" class="modal hidden">
+        <div class="modal-content">
+            <h2>根の战 说明 (｀・ω・´)</h2>
+            <p>1. 点击"开♂战"开始游戏</p>
+            <p>2. 使用方向键移动你的火柴人</p>
+            <p>3. 点击屏幕任意位置发射香蕉(95%)或大便(5%)</p>
+            <p>4. 击中大根(敌人)得分:香蕉+1,大便-2</p>
+            <p>5. 小心大根的哑铃攻击(会击倒你3秒)</p>
+            <p>6. 避免与大根直接碰撞(会击倒你5秒)</p>
+            <p>7. 得分≥13胜利!得分<0或香蕉消失则失败</p>
+            <p>8. 大根会不断变换运动模式(｀ε´)</p>
+            <p class="highlight">目标: 用香蕉打败大根! 加油! (ง •̀_•́)ง</p>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="game-screen" class="screen hidden">
+        <div id="score-display">得分: 0</div>
+        <div id="controls">
+            <button id="left-btn" class="control-btn"><img src="assets/svg/left.svg" alt="左"></button>
+            <button id="right-btn" class="control-btn"><img src="assets/svg/right.svg" alt="右"></button>
+            <button id="jump-btn" class="control-btn"><img src="assets/svg/jump.svg" alt="跳跃"></button>
+        </div>
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- 胜利界面 -->
+    <div id="win-screen" class="screen hidden">
+        <h1>胜利! 大根被你征服了! (ﾉ>ω<)ﾉ</h1>
+        <div class="buttons">
+            <button id="play-again-btn" class="action-btn">再战! (ง •̀_•́)ง</button>
+            <button id="return-btn" class="action-btn">返回 (´・ω・`)</button>
+        </div>
+    </div>
+
+    <!-- 失败界面 -->
+    <div id="lose-screen" class="screen hidden">
+        <h1>败北... 大根太强了! (╥﹏╥)</h1>
+        <div class="buttons">
+            <button id="retry-btn" class="action-btn">重开! (╯°□°）╯︵ ┻━┻</button>
+            <button id="back-btn" class="action-btn">返回 (´;ω;`)</button>
+        </div>
+    </div>
+
+    <!-- 音频元素 -->
+    <audio id="bgm-menu" loop>
+        <source src="assets/audio/a.ogg" type="audio/ogg">
+    </audio>
+    <audio id="bgm-game" loop>
+        <source src="assets/audio/b.ogg" type="audio/ogg">
+    </audio>
+    <audio id="bgm-win">
+        <source src="assets/audio/c.ogg" type="audio/ogg">
+    </audio>
+
+    <script src="js/utils.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+              </html>
